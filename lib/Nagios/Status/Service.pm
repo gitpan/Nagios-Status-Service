@@ -9,11 +9,11 @@ Nagios::Status::Service - Nagios 3.0 Container Class for Status Services.
 
 =head1 VERSION
 
-Version 0.01
+Version 0.02
 
 =cut
 
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 =head1 SYNOPSIS
 
@@ -112,17 +112,17 @@ sub set_attribute {
     my ($self, $attr) = @_;
 
     if (!defined $attr) {
-        return undef;
+        return;
     } # if
 
-    my @attributes = split(/=/, $attr);
+    # This was a patch written by Jeremy Krieg to handle a bug not reading '='
+    # signs in service status descriptions. Thanks to Jeremy for the patch!
+    if ( $attr =~ /^\s*([^=]+)=(.*?\S)\s*$/ ) {
+        $self->{attributes}->{$1} = $2;
+        return 1;
+    }
 
-    chomp($attributes[1]);
-    $attributes[0] =~ s/^\s*(.+)/$1/;
-
-    $self->{attributes}->{$attributes[0]} = $attributes[1];
-
-    return 1;
+    return;
 }
 
 =pod
@@ -147,7 +147,7 @@ sub get_attribute {
         if (exists $self->{attributes}->{$attr}) {
             return $self->{attributes}->{$attr};
         } else {
-            return undef;
+            return;
         } # if/else
     } # if/else
 } # get_attributes
@@ -342,11 +342,9 @@ sub _populate {
         if (!$found) {
             next;
         } else {
-            my @attr = split(/=/, $line);
-
-            chomp($attr[1]);
-            $attr[0] =~ s/^\s*(.+)/$1/;
-            $attributes{$attr[0]} = $attr[1];
+            # Pointed out by Jeremy Krieg, there was duplicate code
+            # here. Thanks!
+            $self->set_attribute($line);
         } # if/else
     } # while
 
@@ -356,6 +354,8 @@ sub _populate {
 =head1 AUTHOR
 
 Roy Crowder, C<< <rcrowder at cpan.org> >>
+
+Thanks to Jeremy Krieg for patch on release 0.02.
 
 =head1 SEE ALSO
 

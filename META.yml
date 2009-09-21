@@ -1,6 +1,6 @@
 --- #YAML:1.0
 name:               Nagios-Status-Service
-version:            0.01
+version:            0.02
 abstract:           Nagios 3.0 Container Class for Status Services.
 author:
     - Roy Crowder <rcrowder@cpan.org>
